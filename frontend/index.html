@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CoWork-Flex – Réservez votre poste de coworking idéal dans les meilleures villes de France." />
+    <meta name="theme-color" content="#080f1d" />
+    <title>CoWork-Flex – Réservation de Postes de Coworking</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        document.body.innerHTML += '<div style="color:white; background:red; padding: 20px; z-index:9999; position:fixed; top:0; left:0; right:0; font-family:monospace; font-size:14px;"><b>Erreur React/JS:</b><br/>' + message + '<br/><br/>' + (error && error.stack ? error.stack.replace(/\n/g, '<br/>') : '') + '</div>';
+      };
+      window.onunhandledrejection = function(event) {
+        document.body.innerHTML += '<div style="color:white; background:darkred; padding: 20px; z-index:9999; position:fixed; bottom:0; left:0; right:0; font-family:monospace; font-size:14px;"><b>Erreur Promesse non gérée:</b><br/>' + event.reason + '</div>';
+      };
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

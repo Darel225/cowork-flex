@@ -1,0 +1,137 @@
+/* ─── Google Fonts : Inter ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ─── Directives Tailwind ─── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Variables CSS globales ─── */
+:root {
+  --scrollbar-width: 6px;
+}
+
+/* ─── Reset & Base ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f8fafc; /* bg-slate-50 */
+  color: #0f172a; /* text-slate-900 */
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar personnalisée (Webkit) - Thème clair ─── */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669; /* emerald-600 */
+}
+
+/* ─── Classes utilitaires custom ─── */
+@layer components {
+
+  /* Bouton principal */
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-xl
+           transition-all duration-200 ease-out shadow-sm hover:shadow-md hover:-translate-y-0.5
+           active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Bouton danger */
+  .btn-danger {
+    @apply bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-medium
+           px-4 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95 disabled:opacity-50;
+  }
+
+  /* Bouton ghost / secondaire */
+  .btn-ghost {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium
+           px-4 py-2 rounded-xl transition-all duration-200 ease-out;
+  }
+
+  /* Champ de formulaire */
+  .form-input {
+    @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-3
+           text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500
+           focus:ring-4 focus:ring-primary-500/10 transition-all duration-200 shadow-sm;
+  }
+
+  /* Badge type de poste */
+  .badge-type {
+    @apply text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+
+  .badge-open-space {
+    @apply badge-type bg-sky-50 text-sky-700 border border-sky-100;
+  }
+
+  .badge-reunion {
+    @apply badge-type bg-indigo-50 text-indigo-700 border border-indigo-100;
+  }
+
+  .badge-prive {
+    @apply badge-type bg-emerald-50 text-emerald-700 border border-emerald-100;
+  }
+
+  /* Badge statut réservation */
+  .badge-confirmed {
+    @apply text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700
+           border border-emerald-100;
+  }
+
+  .badge-cancelled {
+    @apply text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-500
+           border border-slate-200;
+  }
+
+  /* Alerte d'erreur */
+  .alert-error {
+    @apply bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-3
+           text-sm animate-slide-down shadow-sm;
+  }
+
+  /* Alerte succès */
+  .alert-success {
+    @apply bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl px-4 py-3
+           text-sm animate-slide-down shadow-sm;
+  }
+}
+
+/* ─── Backdrop de la modal ─── */
+.modal-backdrop {
+  background: rgba(15, 23, 42, 0.4); /* slate-900 à 40% */
+  backdrop-filter: blur(4px);
+}
+
+/* ─── Overlay gradient sur les cartes images ─── */
+.image-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}

@@ -1,0 +1,216 @@
+package com.coworkflex.service;
+
+import com.coworkflex.dto.ReservationRequestDTO;
+import com.coworkflex.dto.ReservationResponseDTO;
+import com.coworkflex.exception.DeskAlreadyBookedException;
+import com.coworkflex.model.Desk;
+import com.coworkflex.model.Reservation;
+import com.coworkflex.repository.DeskRepository;
+import com.coworkflex.repository.ReservationRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ReservationService {
+
+    private static final DateTimeFormatter SLOT_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final ReservationRepository reservationRepository;
+    private final DeskRepository deskRepository;
+    private final com.coworkflex.repository.UserRepository userRepository;
+
+    // =========================================================================
+    // RÈGLE MÉTIER 1 : Création avec détection anti-double réservation
+    // =========================================================================
+
+    /**
+     * Crée une nouvelle réservation après validation de toutes les règles métier.
+     *
+     * Processus :
+     * 1. Récupération et validation du poste (404 si inexistant)
+     * 2. Détection de chevauchement horaire (409 si conflit)
+     * 3. Persistance et retour du DTO complet
+     *
+     * @param dto Données de la demande de réservation (déjà validées par @Valid)
+     * @return DTO de la réservation créée
+     * @throws ResponseStatusException HTTP 404 si le poste n'existe pas
+     * @throws DeskAlreadyBookedException HTTP 409 si chevauchement détecté
+     */
+    @Transactional
+    public ReservationResponseDTO createReservation(ReservationRequestDTO dto) {
+        // Étape 1 : Vérification de l'existence du poste
+        Desk desk = deskRepository.findById(dto.getDeskId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Aucun poste trouvé avec l'ID %d.", dto.getDeskId())
+                ));
+
+        // Étape 2 : Détection de chevauchement horaire (Règle anti-double réservation)
+        List<Reservation> overlapping = reservationRepository.findOverlappingReservations(
+                dto.getDeskId(),
+                dto.getStartTime(),
+                dto.getEndTime()
+        );
+
+        if (!overlapping.isEmpty()) {
+            String requestedSlot = dto.getStartTime().format(SLOT_FORMATTER)
+                    + " → "
+                    + dto.getEndTime().format(SLOT_FORMATTER);
+            throw new DeskAlreadyBookedException(dto.getDeskId(), requestedSlot);
+        }
+
+        // Étape 3 : Construction et persistance de la réservation
+        Reservation reservation = Reservation.builder()
+                .userId(dto.getUserId())
+                .desk(desk)
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .status("PENDING")
+                .build();
+
+        Reservation saved = reservationRepository.save(reservation);
+
+        return mapToDTO(saved);
+    }
+
+    // =========================================================================
+    // RÈGLE MÉTIER 2 : Annulation avec vérification du délai > 24h
+    // =========================================================================
+
+    /**
+     * Annule une réservation existante en appliquant la règle des 24 heures.
+     *
+     * Processus :
+     * 1. Récupération de la réservation (404 si inexistante)
+     * 2. Vérification que la réservation n'est pas déjà annulée
+     * 3. Calcul de la durée entre maintenant et le début de la réservation
+     * 4. Rejet si la durée est ≤ 24 heures (400 BAD REQUEST)
+     * 5. Mise à jour du statut en CANCELLED
+     *
+     * @param reservationId Identifiant de la réservation à annuler
+     * @throws ResponseStatusException HTTP 404 si la réservation n'existe pas
+     * @throws ResponseStatusException HTTP 400 si déjà annulée
+     * @throws ResponseStatusException HTTP 400 si délai < 24h
+     */
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        // Étape 1 : Récupération de la réservation
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Aucune réservation trouvée avec l'ID %d.", reservationId)
+                ));
+
+        // Étape 2 : Vérification que la réservation n'est pas déjà annulée
+        if ("CANCELLED".equals(reservation.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    String.format("La réservation ID %d est déjà annulée.", reservationId)
+            );
+        }
+
+        // Étape 3 : Calcul de la durée jusqu'au début de la réservation
+        LocalDateTime now = LocalDateTime.now();
+        Duration durationUntilStart = Duration.between(now, reservation.getStartTime());
+
+        // Étape 4 : Règle des 24h — la durée doit être STRICTEMENT supérieure à 24h
+        if (durationUntilStart.toHours() <= 24) {
+            String startFormatted = reservation.getStartTime().format(SLOT_FORMATTER);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    String.format(
+                            "Annulation impossible : la réservation commence le %s, " +
+                            "soit dans %d heure(s). L'annulation doit être effectuée " +
+                            "au moins 24 heures avant le début du créneau.",
+                            startFormatted,
+                            Math.max(0, durationUntilStart.toHours())
+                    )
+            );
+        }
+
+        // Étape 5 : Application de l'annulation
+        reservation.setStatus("CANCELLED");
+        reservationRepository.save(reservation);
+    }
+
+    // =========================================================================
+    // CONSULTATION
+    // =========================================================================
+
+    /**
+     * Retourne une réservation par son ID.
+     */
+    @Transactional(readOnly = true)
+    public ReservationResponseDTO getReservationById(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Aucune réservation trouvée avec l'ID %d.", id)
+                ));
+        return mapToDTO(reservation);
+    }
+
+    /**
+     * Retourne l'historique complet des réservations d'un utilisateur,
+     * triées par date de début décroissante (les plus récentes en premier).
+     *
+     * @param userId Identifiant de l'utilisateur
+     * @return Liste des DTOs de réservation
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationResponseDTO> getReservationsByUser(Long userId) {
+        List<Reservation> reservations = reservationRepository.findByUserIdOrderByStartTimeDesc(userId);
+
+        return reservations.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // ADMINISTRATION
+    // =========================================================================
+
+    /**
+     * Retourne toutes les réservations du système.
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationResponseDTO> getAllReservations() {
+        List<Reservation> reservations = reservationRepository.findAllByOrderByStartTimeDesc();
+        return reservations.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Met à jour le statut d'une réservation (ex: PENDING -> CONFIRMED ou REJECTED).
+     */
+    @Transactional
+    public ReservationResponseDTO updateReservationStatus(Long id, String status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Aucune réservation trouvée avec l'ID %d.", id)
+                ));
+
+        // On peut ajouter des contrôles ici (ex: ne pas passer de CANCELLED à CONFIRMED)
+        reservation.setStatus(status);
+        Reservation saved = reservationRepository.save(reservation);
+        return mapToDTO(saved);
+    }
+
+    private ReservationResponseDTO mapToDTO(Reservation reservation) {
+        com.coworkflex.model.User user = userRepository.findById(reservation.getUserId()).orElse(null);
+        return ReservationResponseDTO.fromEntityWithUser(reservation, user);
+    }
+}
