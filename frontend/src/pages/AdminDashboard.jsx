@@ -164,6 +164,21 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                     )}
+                    {res.status === 'CONFIRMED' && (
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => {
+                            if(window.confirm("Voulez-vous vraiment annuler cette réservation confirmée ? (Remboursement client)")) {
+                              handleUpdateStatus(res.id, 'CANCELLED');
+                            }
+                          }} 
+                          className="p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" 
+                          title="Forcer l'annulation"
+                        >
+                          <XCircle size={20} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
