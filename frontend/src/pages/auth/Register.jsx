@@ -123,7 +123,7 @@ const Register = () => {
             disabled={loading} // Désactivé si une requête est en cours
             className="btn-primary w-full mt-4"
           >
-            {loading ? (slowLoading ? 'Réveil du serveur (env. 50s)...' : 'Création en cours...') : 'S\'inscrire'}
+            {loading ? (slowLoading ? 'Initialisation sécurisée...' : 'Création en cours...') : 'S\'inscrire'}
           </button>
         </form>
 

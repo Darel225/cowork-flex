@@ -206,7 +206,7 @@ const Dashboard = () => {
           <div className="bg-amber-50 text-amber-800 p-4 rounded-2xl mb-6 flex items-center gap-3 border border-amber-200 animate-fade-in">
             <Loader2 size={20} className="animate-spin shrink-0 text-amber-600" />
             <span className="font-medium text-sm">
-              Notre serveur d'hébergement gratuit se réveille. Cela peut prendre jusqu'à 50 secondes. Merci de votre patience...
+              Initialisation de nos systèmes et chargement des espaces. Cela peut prendre quelques instants, merci de votre patience...
             </span>
           </div>
         )}
@@ -214,7 +214,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-slate-500 font-semibold text-sm uppercase tracking-wider">
             {spacesLoading 
-              ? (slowLoading ? 'Réveil du serveur...' : 'Recherche en cours...') 
+              ? (slowLoading ? 'Initialisation...' : 'Recherche en cours...') 
               : `${filteredSpaces.length} ${filteredSpaces.length > 1 ? 'espaces trouvés' : 'espace trouvé'}`
             }
           </h2>

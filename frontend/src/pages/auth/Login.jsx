@@ -108,7 +108,7 @@ const Login = () => {
             disabled={loading} // On désactive si ça charge
             className="btn-primary w-full mt-2"
           >
-            {loading ? (slowLoading ? 'Réveil du serveur (env. 50s)...' : 'Connexion...') : 'Se connecter'}
+            {loading ? (slowLoading ? 'Initialisation sécurisée...' : 'Connexion...') : 'Se connecter'}
           </button>
         </form>
 
