@@ -46,6 +46,21 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
       setError('Veuillez remplir tous les champs.');
       return;
     }
+
+    // Vérification de l'heure si la date choisie est aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    if (date === today) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const [startH, startM] = startTime.split(':').map(Number);
+      
+      if (startH < currentHour || (startH === currentHour && startM < currentMinute)) {
+        setError("L'heure de début ne peut pas être dans le passé.");
+        return;
+      }
+    }
+
     if (estimatedPrice <= 0) {
       setError('L\'heure de fin doit être postérieure à l\'heure de début.');
       return;
