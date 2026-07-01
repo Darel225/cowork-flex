@@ -12,6 +12,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   
   const [loading, setLoading] = useState(false); // État de chargement (bouton grisé)
+  const [slowLoading, setSlowLoading] = useState(false); // Avertissement cold start Render
   const [error, setError] = useState(null); // Affichage des erreurs
   
   const { login, showNotification } = useApp();
@@ -28,13 +29,20 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Empêche le comportement natif du formulaire (rechargement de la page)
     setLoading(true);
+    setSlowLoading(false);
     setError(null);
+    
+    // Si la requête prend plus de 3s, c'est probablement un "Cold Start" de Render
+    const timeoutId = setTimeout(() => {
+      setSlowLoading(true);
+    }, 3000);
     
     try {
       // Étape A : On appelle l'API d'inscription
       const response = await authRegister({ name, email, password });
       
       // Étape B : L'inscription a réussi, le backend nous a renvoyé un token
+      clearTimeout(timeoutId);
       // On connecte donc l'utilisateur immédiatement !
       login(response.data, response.data.token);
       showNotification('Inscription réussie ! Bienvenue sur CoWork-Flex.');
@@ -42,10 +50,12 @@ const Register = () => {
       // Étape C : Redirection vers la page d'accueil
       navigate('/');
     } catch (err) {
+      clearTimeout(timeoutId);
       // En cas d'erreur (ex: Email déjà utilisé)
       setError(err.message || 'Une erreur est survenue lors de l\'inscription');
     } finally {
       setLoading(false);
+      setSlowLoading(false);
     }
   };
 
@@ -113,7 +123,7 @@ const Register = () => {
             disabled={loading} // Désactivé si une requête est en cours
             className="btn-primary w-full mt-4"
           >
-            {loading ? 'Création en cours...' : 'S\'inscrire'}
+            {loading ? (slowLoading ? 'Réveil du serveur (env. 50s)...' : 'Création en cours...') : 'S\'inscrire'}
           </button>
         </form>
 

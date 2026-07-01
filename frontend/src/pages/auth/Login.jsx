@@ -10,6 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false); // Pour afficher un spinner ou désactiver le bouton
+  const [slowLoading, setSlowLoading] = useState(false); // Avertissement cold start Render
   const [error, setError] = useState(null); // Pour afficher les messages d'erreur
   
   const { login, showNotification } = useApp();
@@ -26,24 +27,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Empêche le rechargement de la page par défaut du formulaire
     setLoading(true);
+    setSlowLoading(false);
     setError(null);
+    
+    // Détecte si la requête prend plus de 3 secondes (démarrage à froid de Render)
+    const timeoutId = setTimeout(() => {
+      setSlowLoading(true);
+    }, 3000);
     
     try {
       // On envoie la requête à l'API backend
       const response = await authLogin({ email, password });
       
       // Si on arrive ici, c'est que l'API a répondu OK (200)
+      clearTimeout(timeoutId);
       login(response.data, response.data.token);
       showNotification('Connexion réussie !');
       
       // On redirige vers la page d'accueil
       navigate('/');
     } catch (err) {
+      clearTimeout(timeoutId);
       // Si on arrive ici, c'est que l'API a renvoyé une erreur (ex: 401 Unauthorized)
       setError(err.message || 'Identifiants incorrects');
     } finally {
       // Quoi qu'il arrive (succès ou erreur), on arrête l'état de chargement
       setLoading(false);
+      setSlowLoading(false);
     }
   };
 
@@ -98,7 +108,7 @@ const Login = () => {
             disabled={loading} // On désactive si ça charge
             className="btn-primary w-full mt-2"
           >
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? (slowLoading ? 'Réveil du serveur (env. 50s)...' : 'Connexion...') : 'Se connecter'}
           </button>
         </form>
 
