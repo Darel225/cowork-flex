@@ -61,13 +61,13 @@ export const authRegister = (data) => api.post('/api/auth/register', data);
 // ==========================================
 
 // Récupérer les notifications d'un utilisateur
-export const getUserNotifications = (userId) => api.get(`/notifications/user/${userId}`);
+export const getUserNotifications = (userId) => api.get(`/api/notifications/user/${userId}`);
 
 // Marquer une notification comme lue
-export const markNotificationAsRead = (id) => api.put(`/notifications/${id}/read`);
+export const markNotificationAsRead = (id) => api.put(`/api/notifications/${id}/read`);
 
 // Marquer toutes les notifications comme lues
-export const markAllNotificationsAsRead = (userId) => api.put(`/notifications/user/${userId}/read-all`);
+export const markAllNotificationsAsRead = (userId) => api.put(`/api/notifications/user/${userId}/read-all`);
 
 /**
  * Récupère la liste des espaces avec filtres optionnels.
