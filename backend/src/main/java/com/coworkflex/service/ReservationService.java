@@ -170,9 +170,7 @@ public class ReservationService {
      */
     @Transactional(readOnly = true)
     public List<ReservationResponseDTO> getReservationsByUser(Long userId) {
-        List<Reservation> reservations = reservationRepository.findByUserIdOrderByStartTimeDesc(userId);
-
-        return reservations.stream()
+        return reservationRepository.findByUserIdOrderByIdDesc(userId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -186,8 +184,7 @@ public class ReservationService {
      */
     @Transactional(readOnly = true)
     public List<ReservationResponseDTO> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAllByOrderByStartTimeDesc();
-        return reservations.stream()
+        return reservationRepository.findAllByOrderByIdDesc().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

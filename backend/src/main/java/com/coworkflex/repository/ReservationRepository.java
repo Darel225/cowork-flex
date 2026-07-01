@@ -13,9 +13,9 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     /**
-     * Retourne l'ensemble des réservations d'un utilisateur, triées par date de début décroissante.
+     * Retourne l'ensemble des réservations d'un utilisateur, triées par date de création décroissante (ID).
      */
-    List<Reservation> findByUserIdOrderByStartTimeDesc(Long userId);
+    List<Reservation> findByUserIdOrderByIdDesc(Long userId);
 
     /**
      * Détecte les réservations actives (CONFIRMED) qui se chevauchent avec le créneau demandé
@@ -48,9 +48,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     /**
-     * Retourne toutes les réservations triées par date de création/début.
+     * Retourne toutes les réservations triées par date de création décroissante (ID).
      */
-    List<Reservation> findAllByOrderByStartTimeDesc();
+    List<Reservation> findAllByOrderByIdDesc();
 
     /**
      * Retourne toutes les réservations confirmées d'un poste spécifique.
