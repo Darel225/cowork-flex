@@ -10,4 +10,6 @@ public class ReservationStatusUpdateRequestDTO {
     @NotBlank(message = "Le statut est obligatoire")
     @Pattern(regexp = "^(CONFIRMED|REJECTED|CANCELLED)$", message = "Statut invalide (CONFIRMED, REJECTED, CANCELLED attendus)")
     private String status;
+
+    private String reason;
 }

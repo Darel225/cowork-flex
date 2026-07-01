@@ -42,7 +42,7 @@ public class AdminController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationStatusUpdateRequestDTO dto) {
         
-        ReservationResponseDTO updated = reservationService.updateReservationStatus(id, dto.getStatus());
+        ReservationResponseDTO updated = reservationService.updateReservationStatus(id, dto.getStatus(), dto.getReason());
         return ResponseEntity.ok(updated);
     }
 

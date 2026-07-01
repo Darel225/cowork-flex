@@ -121,9 +121,10 @@ export const getAllReservations = () =>
  * Modifie le statut d'une réservation. (ADMIN)
  * @param {number} reservationId
  * @param {string} status 'CONFIRMED' | 'REJECTED'
+ * @param {string} [reason] Motif du refus (optionnel)
  */
-export const updateReservationStatus = (reservationId, status) =>
-  api.patch(`/api/admin/reservations/${reservationId}/status`, { status });
+export const updateReservationStatus = (reservationId, status, reason = null) =>
+  api.patch(`/api/admin/reservations/${reservationId}/status`, { status, reason });
 
 /**
  * Ajoute un nouveau poste à un espace. (ADMIN)

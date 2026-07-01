@@ -213,7 +213,7 @@ public class ReservationService {
      * Met à jour le statut d'une réservation (ex: PENDING -> CONFIRMED ou REJECTED).
      */
     @Transactional
-    public ReservationResponseDTO updateReservationStatus(Long id, String status) {
+    public ReservationResponseDTO updateReservationStatus(Long id, String status, String reason) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -234,7 +234,10 @@ public class ReservationService {
             type = "SUCCESS";
         } else if ("REJECTED".equals(status)) {
             title = "Réservation Refusée ❌";
-            message = "Votre réservation pour " + reservation.getDesk().getSpace().getName() + " a été refusée par l'administrateur.";
+            message = "Votre réservation pour l'espace " + reservation.getDesk().getSpace().getName() + " a été refusée par l'administrateur.";
+            if (reason != null && !reason.trim().isEmpty()) {
+                message += " Motif : " + reason.trim();
+            }
             type = "DANGER";
         } else if ("CANCELLED".equals(status)) {
             title = "Réservation Annulée ⚠️";

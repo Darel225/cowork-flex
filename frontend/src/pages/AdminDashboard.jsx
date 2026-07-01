@@ -67,8 +67,19 @@ const AdminDashboard = () => {
   
   // Quand l'Admin clique sur Valider ou Refuser une réservation
   const handleUpdateStatus = async (id, newStatus) => {
+    let reason = null;
+    if (newStatus === 'REJECTED') {
+      const userInput = window.prompt("Veuillez indiquer le motif du refus (ce motif sera envoyé à l'utilisateur) :");
+      if (userInput === null) return; // L'admin a annulé
+      if (userInput.trim() === "") {
+        alert("Le motif est obligatoire pour un refus.");
+        return;
+      }
+      reason = userInput.trim();
+    }
+
     try {
-      await updateReservationStatus(id, newStatus);
+      await updateReservationStatus(id, newStatus, reason);
       // On met à jour visuellement le tableau sans recharger la page
       setReservations(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
       showNotification(`Réservation ${newStatus === 'CONFIRMED' ? 'validée' : 'refusée'}.`);
