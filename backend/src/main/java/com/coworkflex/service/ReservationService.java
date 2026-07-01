@@ -84,6 +84,23 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
 
+        // Notifier les administrateurs
+        com.coworkflex.model.User user = userRepository.findById(dto.getUserId()).orElse(null);
+        String userName = user != null ? user.getName() : "Un utilisateur";
+        String spaceName = desk.getSpace().getName();
+        
+        List<com.coworkflex.model.User> admins = userRepository.findByRole(com.coworkflex.model.Role.ROLE_ADMIN);
+        List<Notification> adminNotifs = admins.stream()
+                .map(admin -> Notification.builder()
+                        .userId(admin.getId())
+                        .title("Nouvelle Réservation 🔔")
+                        .message(userName + " a fait une demande de réservation pour l'espace " + spaceName + ". Veuillez consulter le Dashboard pour la valider.")
+                        .type("INFO")
+                        .read(false)
+                        .build())
+                .collect(Collectors.toList());
+        notificationRepository.saveAll(adminNotifs);
+
         return mapToDTO(saved);
     }
 
