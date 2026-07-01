@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
-import { ShieldCheck, Calendar, MapPin, User, CheckCircle, XCircle, Clock, Plus, Inbox, Building } from 'lucide-react';
+import { ShieldCheck, Calendar, MapPin, User, CheckCircle, XCircle, Clock, Plus, Inbox, Building, RefreshCw } from 'lucide-react';
 import { getAllReservations, updateReservationStatus } from '../api/api';
 import { useApp } from '../context/AppContext';
 import AddDeskModal from '../components/AddDeskModal';
@@ -43,6 +43,16 @@ const AdminDashboard = () => {
     // On ne charge les réservations QUE si l'utilisateur est un Admin
     if (currentUser?.role === 'ROLE_ADMIN') {
       fetchReservations();
+      
+      // Auto-refresh toutes les 15 secondes pour rendre la vue dynamique
+      const intervalId = setInterval(() => {
+        // On appelle l'API sans déclencher le spinner de chargement global
+        getAllReservations().then(response => {
+          setReservations(response.data);
+        }).catch(err => console.error("Erreur auto-refresh:", err));
+      }, 15000);
+      
+      return () => clearInterval(intervalId);
     }
   }, [currentUser, fetchReservations]);
 
@@ -82,7 +92,18 @@ const AdminDashboard = () => {
             <ShieldCheck className="text-amber-500" size={32} />
             Espace Administration
           </h1>
-          <p className="text-slate-500 font-medium mt-1">Gérez l'ensemble des réservations et postes de travail.</p>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-slate-500 font-medium">Gérez l'ensemble des réservations et postes de travail.</p>
+            <button
+              onClick={fetchReservations}
+              disabled={loading}
+              className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+              title="Rafraîchir les réservations"
+            >
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              Actualiser
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
