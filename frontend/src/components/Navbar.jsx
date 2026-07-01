@@ -199,7 +199,7 @@ const Navbar = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className={`text-sm font-bold truncate ${!notif.read ? 'text-slate-900' : 'text-slate-700'}`}>{notif.title}</p>
-                                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notif.message}</p>
+                                  <p className="text-xs text-slate-500 mt-0.5">{notif.message}</p>
                                   <p className="text-[10px] text-slate-400 font-medium mt-1">
                                     {new Date(notif.createdAt).toLocaleDateString('fr-FR')} à {new Date(notif.createdAt).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
                                   </p>
