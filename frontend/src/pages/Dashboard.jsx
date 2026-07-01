@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, Building2, AlertCircle } from 'lucide-react';
+import { Search, SlidersHorizontal, Building2, AlertCircle, Loader2 } from 'lucide-react';
 import { getSpaces, getDesksBySpace } from '../api/api';
 import SpaceCard from '../components/SpaceCard';
 import DeskList from '../components/DeskList';
@@ -20,6 +20,7 @@ const Dashboard = () => {
   // Espaces
   const [spaces, setSpaces] = useState([]);
   const [spacesLoading, setSpacesLoading] = useState(true);
+  const [slowLoading, setSlowLoading] = useState(false);
   const [spacesError, setSpacesError] = useState(null);
 
   // Recherche et filtres
@@ -42,15 +43,23 @@ const Dashboard = () => {
   // useCallback permet de mémoriser la fonction pour éviter de la recréer à chaque rendu
   const fetchSpaces = useCallback(async () => {
     setSpacesLoading(true);
+    setSlowLoading(false);
     setSpacesError(null);
+    
+    // Détection du cold start
+    const timeoutId = setTimeout(() => setSlowLoading(true), 3000);
+    
     try {
       // On interroge l'API pour récupérer les espaces (avec les filtres éventuels)
       const response = await getSpaces(filterCity || null, filterCapacity ? Number(filterCapacity) : null);
+      clearTimeout(timeoutId);
       setSpaces(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
+      clearTimeout(timeoutId);
       setSpacesError(err.message || 'Impossible de charger les espaces.');
     } finally {
       setSpacesLoading(false);
+      setSlowLoading(false);
     }
   }, [filterCity, filterCapacity]);
 
@@ -193,9 +202,21 @@ const Dashboard = () => {
           </div>
         )}
 
+        {slowLoading && (
+          <div className="bg-amber-50 text-amber-800 p-4 rounded-2xl mb-6 flex items-center gap-3 border border-amber-200 animate-fade-in">
+            <Loader2 size={20} className="animate-spin shrink-0 text-amber-600" />
+            <span className="font-medium text-sm">
+              Notre serveur d'hébergement gratuit se réveille. Cela peut prendre jusqu'à 50 secondes. Merci de votre patience...
+            </span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-slate-500 font-semibold text-sm uppercase tracking-wider">
-            {filteredSpaces.length} {filteredSpaces.length > 1 ? 'espaces trouvés' : 'espace trouvé'}
+            {spacesLoading 
+              ? (slowLoading ? 'Réveil du serveur...' : 'Recherche en cours...') 
+              : `${filteredSpaces.length} ${filteredSpaces.length > 1 ? 'espaces trouvés' : 'espace trouvé'}`
+            }
           </h2>
         </div>
 
