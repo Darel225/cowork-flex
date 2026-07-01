@@ -11,7 +11,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 30000, // 30 secondes de timeout (utile pour Neon DB serverless)
+  timeout: 60000, // 60 secondes de timeout (pour le cold start de Render)
 });
 
 // ─── Intercepteur de requêtes (ajout du JWT et log) ──────────────────────────
