@@ -5,8 +5,10 @@ import com.coworkflex.dto.ReservationResponseDTO;
 import com.coworkflex.exception.DeskAlreadyBookedException;
 import com.coworkflex.model.Desk;
 import com.coworkflex.model.Reservation;
+import com.coworkflex.model.Notification;
 import com.coworkflex.repository.DeskRepository;
 import com.coworkflex.repository.ReservationRepository;
+import com.coworkflex.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final DeskRepository deskRepository;
     private final com.coworkflex.repository.UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     // =========================================================================
     // RÈGLE MÉTIER 1 : Création avec détection anti-double réservation
@@ -200,9 +203,39 @@ public class ReservationService {
                         String.format("Aucune réservation trouvée avec l'ID %d.", id)
                 ));
 
-        // On peut ajouter des contrôles ici (ex: ne pas passer de CANCELLED à CONFIRMED)
         reservation.setStatus(status);
         Reservation saved = reservationRepository.save(reservation);
+        
+        // Création de la notification pour l'utilisateur
+        String title = "Mise à jour de réservation";
+        String message = "";
+        String type = "INFO";
+        
+        if ("CONFIRMED".equals(status)) {
+            title = "Réservation Validée 🎉";
+            message = "Votre réservation pour " + reservation.getDesk().getSpace().getName() + " a été validée. Vous pouvez télécharger votre reçu dans votre profil.";
+            type = "SUCCESS";
+        } else if ("REJECTED".equals(status)) {
+            title = "Réservation Refusée ❌";
+            message = "Votre réservation pour " + reservation.getDesk().getSpace().getName() + " a été refusée par l'administrateur.";
+            type = "DANGER";
+        } else if ("CANCELLED".equals(status)) {
+            title = "Réservation Annulée ⚠️";
+            message = "Votre réservation pour " + reservation.getDesk().getSpace().getName() + " a été annulée.";
+            type = "DANGER";
+        }
+        
+        if (!"PENDING".equals(status)) {
+            Notification notif = Notification.builder()
+                .userId(reservation.getUserId())
+                .title(title)
+                .message(message)
+                .type(type)
+                .isRead(false)
+                .build();
+            notificationRepository.save(notif);
+        }
+
         return mapToDTO(saved);
     }
 

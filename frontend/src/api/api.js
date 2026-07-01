@@ -56,6 +56,19 @@ export const authRegister = (data) => api.post('/api/auth/register', data);
 
 // ─── Fonctions d'appel API ────────────────────────────────────────────────────
 
+// ==========================================
+// 5. GESTION DES NOTIFICATIONS
+// ==========================================
+
+// Récupérer les notifications d'un utilisateur
+export const getUserNotifications = (userId) => api.get(`/notifications/user/${userId}`);
+
+// Marquer une notification comme lue
+export const markNotificationAsRead = (id) => api.put(`/notifications/${id}/read`);
+
+// Marquer toutes les notifications comme lues
+export const markAllNotificationsAsRead = (userId) => api.put(`/notifications/user/${userId}/read-all`);
+
 /**
  * Récupère la liste des espaces avec filtres optionnels.
  * @param {string|null} city - Filtre par ville
