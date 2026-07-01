@@ -35,7 +35,7 @@ export const generateReceipt = (reservation, currentUser) => {
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text(`N° de Réservation : #${reservation.id.substring(0, 8).toUpperCase()}`, 20, 70);
+  doc.text(`N° de Réservation : #${String(reservation.id).substring(0, 8).toUpperCase()}`, 20, 70);
   doc.text(`Émis le : ${new Date().toLocaleDateString('fr-FR')}`, 20, 78);
   
   doc.text(`Statut :`, 140, 70);
@@ -108,5 +108,5 @@ export const generateReceipt = (reservation, currentUser) => {
   });
 
   // Téléchargement du PDF
-  doc.save(`CoWorkFlex_Recu_${reservation.id.substring(0, 8)}.pdf`);
+  doc.save(`CoWorkFlex_Recu_${String(reservation.id).substring(0, 8)}.pdf`);
 };
