@@ -28,10 +28,19 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
 
   // Calcul du prix estimé
   let estimatedPrice = 0;
+  let spansNextDay = false; // Indicateur pour savoir si ça passe minuit
+
   if (startTime && endTime) {
     const [startH, startM] = startTime.split(':').map(Number);
     const [endH, endM] = endTime.split(':').map(Number);
-    const hours = (endH + endM / 60) - (startH + startM / 60);
+    let hours = (endH + endM / 60) - (startH + startM / 60);
+    
+    // Si l'heure de fin est inférieure à l'heure de début, on suppose que ça se termine le lendemain
+    if (hours < 0) {
+      hours += 24;
+      spansNextDay = true;
+    }
+
     if (hours > 0) {
       estimatedPrice = hours * desk.pricePerHour;
     }
@@ -62,7 +71,7 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
     }
 
     if (estimatedPrice <= 0) {
-      setError('L\'heure de fin doit être postérieure à l\'heure de début.');
+      setError('La durée de la réservation doit être d\'au moins 1 minute.');
       return;
     }
 
@@ -86,7 +95,16 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       const startDateTime = `${date}T${startTime}:00`;
-      const endDateTime = `${date}T${endTime}:00`;
+      
+      // Si la réservation passe minuit, on ajoute 1 jour à la date de fin
+      let endDateStr = date;
+      if (spansNextDay) {
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        endDateStr = nextDay.toISOString().split('T')[0];
+      }
+      
+      const endDateTime = `${endDateStr}T${endTime}:00`;
 
       // Sauvegarde en base de données
       await createReservation({
