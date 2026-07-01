@@ -54,13 +54,13 @@ const Navbar = () => {
     }
   }, [currentUser]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = async (e, id) => {
     e.stopPropagation();
     try {
       await markNotificationAsRead(id);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     } catch (err) {
       console.error(err);
     }
@@ -70,7 +70,7 @@ const Navbar = () => {
     if (!currentUser) return;
     try {
       await markAllNotificationsAsRead(currentUser.id);
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       console.error(err);
     }
@@ -193,18 +193,18 @@ const Navbar = () => {
                             <div className="p-4 text-center text-sm text-slate-500">Aucune notification.</div>
                           ) : (
                             notifications.map(notif => (
-                              <div key={notif.id} className={`p-3 rounded-xl flex gap-3 items-start transition-colors ${!notif.isRead ? 'bg-primary-50/50' : 'hover:bg-slate-50'}`}>
+                              <div key={notif.id} className={`p-3 rounded-xl flex gap-3 items-start transition-colors ${!notif.read ? 'bg-primary-50/50' : 'hover:bg-slate-50'}`}>
                                 <div className="mt-0.5 shrink-0">
                                   {getNotifIcon(notif.type)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className={`text-sm font-bold truncate ${!notif.isRead ? 'text-slate-900' : 'text-slate-700'}`}>{notif.title}</p>
+                                  <p className={`text-sm font-bold truncate ${!notif.read ? 'text-slate-900' : 'text-slate-700'}`}>{notif.title}</p>
                                   <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notif.message}</p>
                                   <p className="text-[10px] text-slate-400 font-medium mt-1">
                                     {new Date(notif.createdAt).toLocaleDateString('fr-FR')} à {new Date(notif.createdAt).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
                                   </p>
                                 </div>
-                                {!notif.isRead && (
+                                {!notif.read && (
                                   <button onClick={(e) => handleMarkAsRead(e, notif.id)} className="p-1 rounded text-primary-600 hover:bg-primary-100" title="Marquer comme lu">
                                     <Check size={14} />
                                   </button>

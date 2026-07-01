@@ -231,7 +231,7 @@ public class ReservationService {
                 .title(title)
                 .message(message)
                 .type(type)
-                .isRead(false)
+                .read(false)
                 .build();
             notificationRepository.save(notif);
         }

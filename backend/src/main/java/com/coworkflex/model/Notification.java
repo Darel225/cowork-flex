@@ -31,7 +31,7 @@ public class Notification {
     private String type;
 
     @Column(nullable = false)
-    private Boolean isRead = false;
+    private Boolean read = false;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

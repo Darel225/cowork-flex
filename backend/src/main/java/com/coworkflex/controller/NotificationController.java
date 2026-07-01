@@ -27,15 +27,15 @@ public class NotificationController {
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         Notification notif = notificationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification introuvable"));
-        notif.setIsRead(true);
+        notif.setRead(true);
         notificationRepository.save(notif);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/user/{userId}/read-all")
     public ResponseEntity<Void> markAllAsRead(@PathVariable Long userId) {
-        List<Notification> unread = notificationRepository.findByUserIdAndIsReadFalse(userId);
-        unread.forEach(n -> n.setIsRead(true));
+        List<Notification> unread = notificationRepository.findByUserIdAndReadFalse(userId);
+        unread.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unread);
         return ResponseEntity.ok().build();
     }
