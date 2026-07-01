@@ -1,0 +1,10 @@
+# Ignorer le dossier des dépendances Frontend
+frontend/node_modules/
+
+# Ignorer le dossier de build Backend
+backend/target/
+
+# Variables d'environnement
+.env
+.env.local
+.env.*.local
