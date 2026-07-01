@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   User, Calendar, Clock, MapPin, Monitor, Users, Lock,
-  Trash2, AlertCircle, RefreshCw, Inbox
+  Trash2, AlertCircle, RefreshCw, Inbox, FileText
 } from 'lucide-react';
 import { getUserReservations, cancelReservation } from '../api/api';
 import { useApp } from '../context/AppContext';
+import { generateReceipt } from '../utils/pdfGenerator';
 
 /**
  * Page de Profil.
@@ -289,14 +290,21 @@ const Profile = () => {
                           </button>
                         ) : isConfirmed ? (
                            <div className="md:text-right text-center">
-                             <p className="text-xs text-slate-500 font-medium mb-1">
+                             <p className="text-xs text-slate-500 font-medium mb-2">
                                Validée. Annulation impossible en ligne.
                              </p>
-                             <div className="flex flex-col gap-0.5 mt-1">
-                               <a href="tel:+2250102030405" className="text-xs text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
+                             <button
+                               onClick={() => generateReceipt(res, currentUser)}
+                               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 transition-colors shadow-sm mb-3"
+                             >
+                               <FileText size={14} />
+                               Télécharger le Reçu
+                             </button>
+                             <div className="flex flex-col gap-0.5">
+                               <a href="tel:+2250102030405" className="text-[10px] text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
                                  <span>📞</span> +225 01 02 03 04 05
                                </a>
-                               <a href="mailto:contact@coworkflex.ci" className="text-xs text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
+                               <a href="mailto:contact@coworkflex.ci" className="text-[10px] text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
                                  <span>✉️</span> contact@coworkflex.ci
                                </a>
                              </div>
