@@ -17,16 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
-/**
- * Composant d'initialisation des données de test.
- * S'exécute automatiquement au démarrage de l'application (CommandLineRunner).
- *
- * Injecte :
- * - 3 espaces de coworking dans 3 villes différentes
- * - 7 postes répartis entre les espaces
- *
- * Les utilisateurs fictifs sont loggés (IDs 1 et 2 à utiliser dans les tests API).
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -45,10 +35,21 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  CoWork-Flex — Initialisation des données");
         log.info("========================================");
 
-        initializeSpaces();
+        // Si des espaces se sont dupliqués (bug de Render Cold Start), on nettoie tout
+        if (spaceRepository.count() >= 10) {
+            log.info("  Suppression des données dupliquées...");
+            reservationRepository.deleteAll();
+            deskRepository.deleteAll();
+            spaceRepository.deleteAll();
+        }
+
+        if (spaceRepository.count() == 0) {
+            initializeSpaces();
+        }
+        
         createUsers();
 
-        log.info("  ✅ Données initialisées avec succès !");
+        log.info("  ✅ Données prêtes !");
         log.info("  👤 Utilisateurs : {}", userRepository.count());
         log.info("  📊 Espaces : {}", spaceRepository.count());
         log.info("  🖥️  Postes  : {}", deskRepository.count());
@@ -56,115 +57,69 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeSpaces() {
-        // ─────────────────────────────────────────────
-        // ESPACE 1 : Le Lab Paris
-        // ─────────────────────────────────────────────
-        Space labParis = Space.builder()
-                .name("Le Lab Paris")
-                .city("Paris")
+        // ESPACE 1 : Le Plateau Center (Abidjan)
+        Space plateau = Space.builder()
+                .name("Le Plateau Center")
+                .city("Abidjan")
                 .capacity(50)
-                .description("Espace de coworking premium au cœur de Paris. Accès 24h/24, " +
-                              "salles de réunion équipées, connexion fibre 1 Gbit/s, " +
-                              "café et snacks inclus.")
+                .description("Espace de coworking premium au cœur du centre des affaires d'Abidjan (Le Plateau). Accès 24h/24, connexion fibre, café ivoirien inclus.")
                 .imageUrl("https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80")
                 .build();
+        plateau = spaceRepository.save(plateau);
+        deskRepository.save(Desk.builder().code("PL-A01").type("Open Space").pricePerHour(new BigDecimal("5.00")).space(plateau).build());
+        deskRepository.save(Desk.builder().code("PL-R01").type("Réunion").pricePerHour(new BigDecimal("15.00")).space(plateau).build());
+        deskRepository.save(Desk.builder().code("PL-P01").type("Privé").pricePerHour(new BigDecimal("20.00")).space(plateau).build());
 
-        labParis = spaceRepository.save(labParis);
-
-        Desk labParis_openSpace = Desk.builder()
-                .code("LP-A01")
-                .type("Open Space")
-                .pricePerHour(new BigDecimal("15.00"))
-                .space(labParis)
-                .build();
-
-        Desk labParis_reunion = Desk.builder()
-                .code("LP-R01")
-                .type("Réunion")
-                .pricePerHour(new BigDecimal("25.00"))
-                .space(labParis)
-                .build();
-
-        Desk labParis_prive = Desk.builder()
-                .code("LP-P01")
-                .type("Privé")
-                .pricePerHour(new BigDecimal("35.00"))
-                .space(labParis)
-                .build();
-
-        deskRepository.save(labParis_openSpace);
-        deskRepository.save(labParis_reunion);
-        deskRepository.save(labParis_prive);
-
-        log.info("  ✔ Espace créé : {} ({}) — {} postes", labParis.getName(), labParis.getCity(), 3);
-
-        // ─────────────────────────────────────────────
-        // ESPACE 2 : Hub Lyon
-        // ─────────────────────────────────────────────
-        Space hubLyon = Space.builder()
-                .name("Hub Lyon")
-                .city("Lyon")
-                .capacity(30)
-                .description("Espace collaboratif dynamique dans le quartier de la Confluence. " +
-                              "Ambiance startup, événements networking mensuels, " +
-                              "parking gratuit et accès facilité en transports en commun.")
+        // ESPACE 2 : Cocody Tech Hub (Abidjan)
+        Space cocody = Space.builder()
+                .name("Cocody Tech Hub")
+                .city("Abidjan")
+                .capacity(40)
+                .description("Hub technologique à Cocody, idéal pour les startups et freelances tech. Ambiance dynamique et événements de networking.")
                 .imageUrl("https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80")
                 .build();
+        cocody = spaceRepository.save(cocody);
+        deskRepository.save(Desk.builder().code("CC-A01").type("Open Space").pricePerHour(new BigDecimal("4.00")).space(cocody).build());
+        deskRepository.save(Desk.builder().code("CC-A02").type("Open Space").pricePerHour(new BigDecimal("4.00")).space(cocody).build());
+        deskRepository.save(Desk.builder().code("CC-P01").type("Privé").pricePerHour(new BigDecimal("15.00")).space(cocody).build());
 
-        hubLyon = spaceRepository.save(hubLyon);
-
-        Desk hubLyon_openSpace = Desk.builder()
-                .code("HL-A01")
-                .type("Open Space")
-                .pricePerHour(new BigDecimal("12.00"))
-                .space(hubLyon)
-                .build();
-
-        Desk hubLyon_reunion = Desk.builder()
-                .code("HL-R01")
-                .type("Réunion")
-                .pricePerHour(new BigDecimal("20.00"))
-                .space(hubLyon)
-                .build();
-
-        deskRepository.save(hubLyon_openSpace);
-        deskRepository.save(hubLyon_reunion);
-
-        log.info("  ✔ Espace créé : {} ({}) — {} postes", hubLyon.getName(), hubLyon.getCity(), 2);
-
-        // ─────────────────────────────────────────────
-        // ESPACE 3 : Spot Bordeaux
-        // ─────────────────────────────────────────────
-        Space spotBordeaux = Space.builder()
-                .name("Spot Bordeaux")
-                .city("Bordeaux")
-                .capacity(20)
-                .description("Coworking chaleureux dans le cœur historique de Bordeaux. " +
-                              "Accès aux terrasses en été, bibliothèque de ressources professionnelles, " +
-                              "cuisine équipée et local à vélos sécurisé.")
+        // ESPACE 3 : Yamoussoukro Business Hub (Yamoussoukro)
+        Space yakro = Space.builder()
+                .name("Yamoussoukro Business Hub")
+                .city("Yamoussoukro")
+                .capacity(30)
+                .description("Un cadre calme et prestigieux dans la capitale politique de la Côte d'Ivoire. Salles climatisées et parking sécurisé.")
                 .imageUrl("https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80")
                 .build();
+        yakro = spaceRepository.save(yakro);
+        deskRepository.save(Desk.builder().code("YK-A01").type("Open Space").pricePerHour(new BigDecimal("3.50")).space(yakro).build());
+        deskRepository.save(Desk.builder().code("YK-R01").type("Réunion").pricePerHour(new BigDecimal("12.00")).space(yakro).build());
 
-        spotBordeaux = spaceRepository.save(spotBordeaux);
-
-        Desk spotBordeaux_openSpace = Desk.builder()
-                .code("SB-A01")
-                .type("Open Space")
-                .pricePerHour(new BigDecimal("10.00"))
-                .space(spotBordeaux)
+        // ESPACE 4 : San-Pédro Port Workspace (San-Pédro)
+        Space sanPedro = Space.builder()
+                .name("San-Pédro Port Workspace")
+                .city("San-Pédro")
+                .capacity(20)
+                .description("Espace de travail vue sur mer, situé stratégiquement près du port de San-Pédro pour les professionnels de la logistique et de l'export.")
+                .imageUrl("https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80")
                 .build();
-
-        Desk spotBordeaux_prive = Desk.builder()
-                .code("SB-P01")
-                .type("Privé")
-                .pricePerHour(new BigDecimal("30.00"))
-                .space(spotBordeaux)
+        sanPedro = spaceRepository.save(sanPedro);
+        deskRepository.save(Desk.builder().code("SP-A01").type("Open Space").pricePerHour(new BigDecimal("4.00")).space(sanPedro).build());
+        deskRepository.save(Desk.builder().code("SP-P01").type("Privé").pricePerHour(new BigDecimal("18.00")).space(sanPedro).build());
+        
+        // ESPACE 5 : Bouaké Digital (Bouaké)
+        Space bouake = Space.builder()
+                .name("Bouaké Digital")
+                .city("Bouaké")
+                .capacity(25)
+                .description("Coworking moderne au centre de Bouaké. Idéal pour la formation, les ateliers et le travail indépendant au cœur du pays baoulé.")
+                .imageUrl("https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80")
                 .build();
+        bouake = spaceRepository.save(bouake);
+        deskRepository.save(Desk.builder().code("BK-A01").type("Open Space").pricePerHour(new BigDecimal("3.00")).space(bouake).build());
+        deskRepository.save(Desk.builder().code("BK-R01").type("Réunion").pricePerHour(new BigDecimal("10.00")).space(bouake).build());
 
-        deskRepository.save(spotBordeaux_openSpace);
-        deskRepository.save(spotBordeaux_prive);
-
-        log.info("  ✔ Espace créé : {} ({}) — {} postes", spotBordeaux.getName(), spotBordeaux.getCity(), 2);
+        log.info("  ✔ Nouveaux espaces créés en Côte d'Ivoire !");
     }
 
     private void createUsers() {
