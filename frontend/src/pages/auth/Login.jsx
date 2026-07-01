@@ -7,8 +7,8 @@ const Login = () => {
   // ==========================================
   // 1. ÉTATS (Variables qui font réagir l'affichage)
   // ==========================================
-  const [email, setEmail] = useState('alice.dupont@coworkflex.com');
-  const [password, setPassword] = useState('alice123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false); // Pour afficher un spinner ou désactiver le bouton
   const [error, setError] = useState(null); // Pour afficher les messages d'erreur
   
