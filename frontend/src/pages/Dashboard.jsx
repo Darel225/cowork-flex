@@ -84,10 +84,8 @@ const Dashboard = () => {
     setDesksLoading(true);
     setDesksError(null);
 
-    // Animation de défilement fluide vers la section des postes
-    setTimeout(() => {
-      document.getElementById('desks-section')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    // Remonter en haut de la page pour voir les postes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
       const response = await getDesksBySpace(spaceId);
@@ -202,7 +200,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {slowLoading && (
+        {slowLoading && !selectedSpace && (
           <div className="bg-amber-50 text-amber-800 p-4 rounded-2xl mb-6 flex items-center gap-3 border border-amber-200 animate-fade-in">
             <Loader2 size={20} className="animate-spin shrink-0 text-amber-600" />
             <span className="font-medium text-sm">
@@ -211,46 +209,54 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-slate-500 font-semibold text-sm uppercase tracking-wider">
-            {spacesLoading 
-              ? (slowLoading ? 'Initialisation...' : 'Recherche en cours...') 
-              : `${filteredSpaces.length} ${filteredSpaces.length > 1 ? 'espaces trouvés' : 'espace trouvé'}`
-            }
-          </h2>
-        </div>
+        {!selectedSpace ? (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-slate-500 font-semibold text-sm uppercase tracking-wider">
+                {spacesLoading 
+                  ? (slowLoading ? 'Initialisation...' : 'Recherche en cours...') 
+                  : `${filteredSpaces.length} ${filteredSpaces.length > 1 ? 'espaces trouvés' : 'espace trouvé'}`
+                }
+              </h2>
+            </div>
 
-        {spacesLoading ? (
-          /* Skeleton Loading */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-white border border-slate-200 rounded-2xl h-80 animate-pulse">
-                <div className="h-48 bg-slate-100 rounded-t-2xl"></div>
-                <div className="p-6">
-                  <div className="h-6 bg-slate-100 rounded w-3/4 mb-3"></div>
-                  <div className="h-4 bg-slate-100 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-slate-100 rounded w-5/6"></div>
-                </div>
+            {spacesLoading ? (
+              /* Skeleton Loading */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="bg-white border border-slate-200 rounded-2xl h-80 animate-pulse">
+                    <div className="h-48 bg-slate-100 rounded-t-2xl"></div>
+                    <div className="p-6">
+                      <div className="h-6 bg-slate-100 rounded w-3/4 mb-3"></div>
+                      <div className="h-4 bg-slate-100 rounded w-full mb-2"></div>
+                      <div className="h-4 bg-slate-100 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            ) : (
+              /* Grille d'espaces */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredSpaces.map((space) => (
+                  <SpaceCard
+                    key={space.id}
+                    space={space}
+                    onViewDesks={handleViewDesks}
+                    isSelected={false}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          /* Grille d'espaces */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredSpaces.map((space) => (
-              <SpaceCard
-                key={space.id}
-                space={space}
-                onViewDesks={handleViewDesks}
-                isSelected={selectedSpace?.id === space.id}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* ── Section des postes (Anchor) ── */}
-        <div id="desks-section" className="scroll-mt-24">
-          {selectedSpace && (
+          /* ── Vue détaillée d'un Espace (Postes) ── */
+          <div className="animate-fade-in">
+            <button
+              onClick={handleCloseDesks}
+              className="mb-6 flex items-center gap-2 text-primary-600 hover:text-primary-700 font-bold hover:underline"
+            >
+              ← Retour aux espaces
+            </button>
             <DeskList
               spaceName={selectedSpace.name}
               desks={desks}
@@ -259,8 +265,8 @@ const Dashboard = () => {
               onClose={handleCloseDesks}
               onBookDesk={handleBookDesk}
             />
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       {/* ── Modale de réservation ── */}
