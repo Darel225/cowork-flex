@@ -317,13 +317,18 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
                   </p>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={estimatedPrice <= 0}
-                  className="btn-primary py-3 px-8 text-base shadow-lg"
-                >
-                  Continuer
-                </button>
+                <div className="flex flex-col items-end gap-3">
+                  <p className="text-[10px] text-slate-400 font-medium text-right max-w-[200px] leading-tight">
+                    ⚠️ Toute réservation confirmée ne pourra être annulée qu'en contactant le support.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={estimatedPrice <= 0}
+                    className="btn-primary py-3 px-8 text-base shadow-lg"
+                  >
+                    Continuer
+                  </button>
+                </div>
               </div>
             </form>
           </>

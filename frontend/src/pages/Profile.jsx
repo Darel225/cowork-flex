@@ -288,9 +288,19 @@ const Profile = () => {
                             )}
                           </button>
                         ) : isConfirmed ? (
-                           <p className="text-[10px] text-slate-400 font-medium md:text-right text-center leading-tight">
-                             Validée.<br/>Contactez l'accueil pour annuler.
-                           </p>
+                           <div className="md:text-right text-center">
+                             <p className="text-xs text-slate-500 font-medium mb-1">
+                               Validée. Annulation impossible en ligne.
+                             </p>
+                             <div className="flex flex-col gap-0.5 mt-1">
+                               <a href="tel:+2250102030405" className="text-xs text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
+                                 <span>📞</span> +225 01 02 03 04 05
+                               </a>
+                               <a href="mailto:contact@coworkflex.ci" className="text-xs text-primary-600 font-bold hover:underline flex items-center md:justify-end justify-center gap-1">
+                                 <span>✉️</span> contact@coworkflex.ci
+                               </a>
+                             </div>
+                           </div>
                         ) : null}
                       </div>
                     </div>
