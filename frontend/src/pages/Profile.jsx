@@ -269,7 +269,7 @@ const Profile = () => {
 
                       {/* Action */}
                       <div className="col-span-1 md:col-span-3 md:text-right md:pr-4">
-                        {(isConfirmed || isPending) && (
+                        {isPending ? (
                           <button
                             onClick={() => handleCancelReservation(res.id)}
                             disabled={isCancelling}
@@ -287,7 +287,11 @@ const Profile = () => {
                               </>
                             )}
                           </button>
-                        )}
+                        ) : isConfirmed ? (
+                           <p className="text-[10px] text-slate-400 font-medium md:text-right text-center leading-tight">
+                             Validée.<br/>Contactez l'accueil pour annuler.
+                           </p>
+                        ) : null}
                       </div>
                     </div>
 
