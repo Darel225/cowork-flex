@@ -180,7 +180,7 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
                       required
                       placeholder="4242 4242 4242 4242"
                       value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
+                      onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ''))}
                       className="form-input pl-10 font-mono"
                       maxLength="16"
                     />
@@ -195,7 +195,7 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
                       required
                       placeholder="MM/YY"
                       value={expiry}
-                      onChange={(e) => setExpiry(e.target.value)}
+                      onChange={(e) => setExpiry(e.target.value.replace(/[^0-9/]/g, ''))}
                       className="form-input font-mono"
                       maxLength="5"
                     />
@@ -207,7 +207,7 @@ const BookingModal = ({ desk, space, onClose, onSuccess }) => {
                       required
                       placeholder="123"
                       value={cvv}
-                      onChange={(e) => setCvv(e.target.value)}
+                      onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
                       className="form-input font-mono"
                       maxLength="3"
                     />
