@@ -33,7 +33,7 @@ public class Space {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_data", columnDefinition = "TEXT")
     private String imageUrl;
 
     @OneToMany(

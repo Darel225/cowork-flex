@@ -7,11 +7,24 @@ const AddSpaceModal = ({ isOpen, onClose, onSpaceAdded }) => {
     name: '',
     city: '',
     description: '',
-    imageUrl: '',
+    imageUrl: '', // Contiendra la chaîne Base64
     capacity: ''
   });
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setFormData({ ...formData, imageUrl: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -100,15 +113,20 @@ const AddSpaceModal = ({ isOpen, onClose, onSpaceAdded }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">URL de l'image (Card)</label>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Image de l'espace (Fichier local)</label>
               <input
                 required
-                type="url"
-                placeholder="https://images.unsplash.com/..."
-                value={formData.imageUrl}
-                onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
               />
+              {imagePreview && (
+                <div className="mt-3">
+                  <p className="text-xs text-slate-500 mb-1">Aperçu :</p>
+                  <img src={imagePreview} alt="Aperçu" className="h-32 object-cover rounded-xl border border-slate-200" />
+                </div>
+              )}
             </div>
           </form>
         </div>

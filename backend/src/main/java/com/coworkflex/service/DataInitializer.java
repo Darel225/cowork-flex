@@ -35,9 +35,17 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  CoWork-Flex — Initialisation des données");
         log.info("========================================");
 
-        // Si des espaces se sont dupliqués (bug de Render Cold Start), on nettoie tout
-        if (spaceRepository.count() >= 10) {
-            log.info("  Suppression des données dupliquées...");
+        // Migration : si la nouvelle colonne image_data est vide pour les espaces existants, on recrée tout
+        boolean needsMigration = false;
+        if (spaceRepository.count() > 0) {
+            Space firstSpace = spaceRepository.findAll().get(0);
+            if (firstSpace.getImageUrl() == null) {
+                needsMigration = true;
+            }
+        }
+
+        if (needsMigration || spaceRepository.count() >= 10) {
+            log.info("  Nettoyage de la base de données (migration image_data ou doublons)...");
             reservationRepository.deleteAll();
             deskRepository.deleteAll();
             spaceRepository.deleteAll();
